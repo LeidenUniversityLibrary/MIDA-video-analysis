@@ -33,7 +33,6 @@ validation_ds = tf.keras.preprocessing.image_dataset_from_directory(
 
 print("Number of training samples: %d" % tf.data.experimental.cardinality(train_ds))
 print("Number of validation samples: %d" % tf.data.experimental.cardinality(validation_ds))
-print("Number of test samples: %d" % tf.data.experimental.cardinality(test_ds))
 
 
 
@@ -95,7 +94,7 @@ norm_layer.set_weights([mean, var])
 x = base_model(x, training=False)
 x = keras.layers.GlobalAveragePooling2D()(x)
 x = keras.layers.Dropout(0.2)(x)  # Regularize with dropout
-outputs = keras.layers.Dense(1)(x)
+outputs = keras.layers.Dense(3, activation='softmax')(x)
 model = keras.Model(inputs, outputs)
 
 model.summary()
@@ -114,14 +113,12 @@ model.compile(
 epochs = 20
 model.fit(train_ds, epochs=epochs, validation_data=validation_ds)
 
+#predictions = model.predict(X_test)
+#matrix = metrics.confusion_matrix(y_test.argmax(axis=1), y_pred.argmax(axis=1))
 
 
 ## Save the model
 
-# serialize model to JSON
-model_json = model.to_json()
-with open("model.json", "w") as json_file:
-    json_file.write(model_json)
-# serialize weights to HDF5
-model.save_weights("model.h5")
+model.save("symbolism")
+
 print("Saved model to disk")
