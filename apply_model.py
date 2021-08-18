@@ -7,8 +7,8 @@ import cv2
 import os
 # import pytube
 import sys
+import pandas as pd
 
-import numpy as np
 
 model_directory = sys.argv[1]
 video_file = sys.argv[2]
@@ -88,7 +88,7 @@ def predict_video(video_file: str):
 # predict_video(video_file)
 
 validation_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    "/Users/companjenba/surfdrive/Projecten/MIDA/Mustafa/episodes/49/frames_by_class", labels='inferred', label_mode='int',
+    "/Users/companjenba/surfdrive/Projecten/MIDA/Mustafa/episodes/49/frames_by_class", labels='inferred', label_mode='binary',
     class_names=None, color_mode='rgb', image_size=(256,
     256), shuffle=True, seed= 42 , #validation_split= 0.1, subset= 'validation',
     interpolation='bilinear', follow_links=False
@@ -97,7 +97,22 @@ size = (150, 150)
 validation_ds = validation_ds.map(lambda x, y: (tf.image.resize(x, size), y))
 
 print(validation_ds.cardinality())
+data_subset = validation_ds.take(20)
+label_batches = list(labels for images,labels in data_subset)
+all_labels = tf.concat(label_batches, 0)
+# for images, labels in data_subset:
+    # all_labels = np.concatenate([all_labels,labels.numpy()])
+    # print(labels.numpy())
+print(all_labels.shape)
 
-
-predictions = loaded_model.predict(validation_ds, steps=2)
-print(predictions)
+predictions = loaded_model.predict(data_subset, verbose=1)
+# print(predictions, len(predictions))
+# sig_predictions = tf.keras.activations.sigmoid(predictions)
+# print(sig_predictions.shape)
+# pred_labels = tf.stack([sig_predictions, all_labels], axis=1)
+# pred_labels = tf.concat([sig_predictions, all_labels], axis=1)
+pred_labels = tf.concat([predictions, all_labels], axis=1)
+results = pd.DataFrame(pred_labels.numpy(), columns=["prediction", "label"])
+results.to_csv("latest.csv")
+print(pred_labels)
+# print(loaded_model.evaluate(data_subset, verbose=1))
