@@ -13,9 +13,9 @@ image_directory = sys.argv[1]
 model_directory = sys.argv[2]
 
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    image_directory, labels='inferred', label_mode='int',
-    class_names=None, color_mode='rgb', image_size=(256,
-    256), shuffle=True, seed= 42 , validation_split= 0.2, subset= 'training',
+    image_directory, labels='inferred', label_mode='binary',
+    class_names=None, color_mode='rgb', image_size=(150,
+    150), shuffle=True, seed= 42 , validation_split= 0.2, subset= 'training',
     interpolation='bilinear', follow_links=False #, smart_resize=False
 )
 
@@ -25,29 +25,29 @@ print(class_names)
 
 
 validation_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    image_directory, labels='inferred', label_mode='int',
-    class_names=None, color_mode='rgb', image_size=(256,
-    256), shuffle=True, seed= 42 , validation_split= 0.2, subset= 'validation',
+    image_directory, labels='inferred', label_mode='binary',
+    class_names=None, color_mode='rgb', image_size=(150,
+    150), shuffle=True, seed= 42 , validation_split= 0.2, subset= 'validation',
     interpolation='bilinear', follow_links=False #, smart_resize=False
 )
 
 print("Number of training batches: %d" % tf.data.experimental.cardinality(train_ds).numpy())
 print("Number of validation batches: %d" % tf.data.experimental.cardinality(validation_ds).numpy())
 
-print("Resizing datasets")
+# print("Resizing datasets")
 
-size = (150, 150)
+# size = (150, 150)
 
-train_ds = train_ds.map(lambda x, y: (tf.image.resize(x, size), y))
-validation_ds = validation_ds.map(lambda x, y: (tf.image.resize(x, size), y))
+# train_ds = train_ds.map(lambda x, y: (tf.image.resize(x, size), y))
+# validation_ds = validation_ds.map(lambda x, y: (tf.image.resize(x, size), y))
 
 # Random data augmentation
-data_augmentation = keras.Sequential(
-    [
-        layers.experimental.preprocessing.RandomFlip("horizontal"),
-        layers.experimental.preprocessing.RandomRotation(0.1),
-    ]
-)
+# data_augmentation = keras.Sequential(
+#     [
+#         layers.experimental.preprocessing.RandomFlip("horizontal"),
+#         layers.experimental.preprocessing.RandomRotation(0.1),
+#     ]
+# )
 
 
 # Build a model
@@ -83,8 +83,8 @@ norm_layer.set_weights([mean, var])
 x = base_model(x, training=False)
 x = keras.layers.GlobalAveragePooling2D()(x)
 x = keras.layers.Dropout(0.2)(x)  # Regularize with dropout
-outputs = keras.layers.Dense(1)(x)
-model = keras.Model(inputs, outputs)
+outputs = keras.layers.Dense(1, activation='sigmoid')(x)
+model = keras.Model(inputs, outputs, name=model_directory)
 
 model.summary()
 
@@ -95,8 +95,10 @@ print("Starting compilation")
 
 model.compile(
     optimizer=keras.optimizers.Adam(),
-    loss=keras.losses.BinaryCrossentropy(from_logits=True),
-    metrics=[keras.metrics.BinaryAccuracy()],
+    loss=keras.losses.BinaryCrossentropy(from_logits=False),
+    metrics=[keras.metrics.BinaryAccuracy(),
+        tf.keras.metrics.FalsePositives(),
+        tf.keras.metrics.FalseNegatives()],
 )
 
 print("Starting fit")
@@ -106,5 +108,5 @@ model.fit(train_ds, epochs=epochs, validation_data=validation_ds)
 
 ## Save the model
 print("Saving model")
-model.save("./{}/".format(model_directory))
+model.save(model_directory)
 print("Saved model to disk")
