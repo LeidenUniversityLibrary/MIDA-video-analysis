@@ -10,11 +10,12 @@ import sys
 # The `tf.keras.preprocessing.image_dataset_from_directory` can be used to generate a labeled dataset objects from a set of images on disk filed into class-specific folders.
 
 image_directory = sys.argv[1]
+model_directory = sys.argv[2]
 
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     image_directory, labels='inferred', label_mode='int',
     class_names=None, color_mode='rgb', image_size=(256,
-    256), shuffle=True, seed= 42 , validation_split= 0.1, subset= 'training',
+    256), shuffle=True, seed= 42 , validation_split= 0.2, subset= 'training',
     interpolation='bilinear', follow_links=False #, smart_resize=False
 )
 
@@ -26,7 +27,7 @@ print(class_names)
 validation_ds = tf.keras.preprocessing.image_dataset_from_directory(
     image_directory, labels='inferred', label_mode='int',
     class_names=None, color_mode='rgb', image_size=(256,
-    256), shuffle=True, seed= 42 , validation_split= 0.1, subset= 'validation',
+    256), shuffle=True, seed= 42 , validation_split= 0.2, subset= 'validation',
     interpolation='bilinear', follow_links=False #, smart_resize=False
 )
 
@@ -99,11 +100,11 @@ model.compile(
 )
 
 print("Starting fit")
-epochs = 20
+epochs = 5
 model.fit(train_ds, epochs=epochs, validation_data=validation_ds)
 
 
 ## Save the model
 print("Saving model")
-model.save("./trained_model/")
+model.save("./{}/".format(model_directory))
 print("Saved model to disk")
