@@ -16,7 +16,7 @@ results_path = sys.argv[3]
 
 loaded_model = keras.models.load_model(model_directory)
 
-filenames = Dataset.list_files(str(images_path/'*/*/*'), seed=42)#.take(100)
+filenames = Dataset.list_files(str(images_path/'*/*/*'), shuffle=False)#.take(100)
 
 for f in filenames.take(5):
     print(f.numpy())
@@ -55,7 +55,7 @@ def process_path(file_path):
 
 images_ds = filenames.map(process_path, num_parallel_calls=tf.data.AUTOTUNE, deterministic=True)
 for f in images_ds.take(5):
-    print(f)
+    print(f[1].numpy())
 
 
 # label_batches = list(labels for images,labels in data_subset)
