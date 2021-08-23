@@ -94,7 +94,7 @@ norm_layer.set_weights([mean, var])
 x = base_model(x, training=False)
 x = keras.layers.GlobalAveragePooling2D()(x)
 x = keras.layers.Dropout(0.2)(x)  # Regularize with dropout
-outputs = keras.layers.Dense(3, activation='softmax')(x)
+outputs = keras.layers.Dense(3, activation='sigmoid')(x)
 model = keras.Model(inputs, outputs)
 
 model.summary()
@@ -106,8 +106,10 @@ model.summary()
 
 model.compile(
     optimizer=keras.optimizers.Adam(),
-    loss=keras.losses.BinaryCrossentropy(from_logits=True),
-    metrics=[keras.metrics.BinaryAccuracy()],
+    loss=keras.losses.BinaryCrossentropy(from_logits=False),
+    metrics=[[keras.metrics.BinaryAccuracy()],
+        [keras.metrics.BinaryAccuracy()],
+        [keras.metrics.BinaryAccuracy()]]
 )
 
 epochs = 20
