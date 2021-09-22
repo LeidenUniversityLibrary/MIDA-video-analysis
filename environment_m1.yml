@@ -1,0 +1,11 @@
+channels:
+  - defaults
+  - conda-forge
+  - apple
+dependencies:
+  - python=3.8
+  - apple::tensorflow-deps
+  - pip
+  - pip:
+      - tensorflow-macos
+      - tensorflow-metal
