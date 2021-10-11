@@ -1,6 +1,6 @@
 channels:
-  - defaults
   - conda-forge
+  - defaults
   - apple
 dependencies:
   - python=3.8
