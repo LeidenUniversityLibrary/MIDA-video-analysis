@@ -4,8 +4,23 @@ channels:
   - apple
 dependencies:
   - python=3.8
+  - pandas
+  - numpy
+  - Pillow
   - apple::tensorflow-deps
   - pip
+  - cython
+  - libblas
+  - libcblas
+  - liblapack
+  - libcxx
+  - libffi
+  - libgfortran
+  - libgfortran5
+  - libopenblas
+  - llvm-openmp
+  - ncurses
+  - numexpr
   - pip:
       - tensorflow-macos
       - tensorflow-metal
