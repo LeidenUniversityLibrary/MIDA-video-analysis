@@ -3,6 +3,11 @@
 Build a multi-output Tensorflow model to predict whether symbols are visible.
 
 Names of columns with labels must end with `_visible`.
+
+Usage::
+
+    $ python build_multi_hot_model.py image_dir labels.csv output_model_dir
+
 """
 
 import tensorflow as tf

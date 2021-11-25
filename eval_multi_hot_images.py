@@ -1,5 +1,10 @@
 """
 Evaluate a model's predictions on labeled data.
+
+Usage::
+
+    $ python eval_multi_hot_model.py model_dir image_dir labels.csv results.csv
+
 """
 import tensorflow as tf
 import numpy as np

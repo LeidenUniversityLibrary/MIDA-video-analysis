@@ -1,5 +1,10 @@
 """
 Predict multiple labels for images in folders
+
+Usage::
+
+    $ python predict_images.py model_dir image_dir predictions.csv
+
 """
 import tensorflow as tf
 import numpy as np
