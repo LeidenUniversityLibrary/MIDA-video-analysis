@@ -27,7 +27,7 @@ loaded_model = keras.models.load_model(model_directory)
 loaded_model.summary()
 
 
-filenames = Dataset.list_files(str(images_path/'*/*'), shuffle=False)
+filenames = Dataset.list_files(str(images_path/'*/*/*.jpg'), shuffle=False)#.take(100)
 
 
 img_height = 150
@@ -58,7 +58,7 @@ def process_path(file_path):
     return img, file_path
 
 # Create Dataset of images from the filenames Dataset
-images_ds = filenames.map(process_path, num_parallel_calls=tf.data.AUTOTUNE, deterministic=True)
+images_ds = filenames.map(process_path, num_parallel_calls=None, deterministic=True).prefetch(2)
 
 # Create predictions using the loaded model
 predictions = loaded_model.predict(images_ds, verbose=1)
