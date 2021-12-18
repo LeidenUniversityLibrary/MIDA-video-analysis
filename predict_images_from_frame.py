@@ -59,7 +59,6 @@ predictions = loaded_model.predict(validation_generator, verbose=1)
 pred_dict = {}
 for col_name, preds in zip(label_columns, predictions):
     pred_dict[col_name.replace('_visible', '_pred')] = preds.ravel()
-pred_dict['filename'] = validation_generator.filenames
 predictions_df = pd.DataFrame(pred_dict)
 print(predictions_df.head())
 
@@ -67,6 +66,9 @@ print(predictions_df.head())
 rounded_pred_columns = [col + "_round" for col in predictions_df.columns]
 rounded_predictions = predictions_df.apply(round, axis=1)
 rounded_predictions.columns = rounded_pred_columns
+
+# Add filenames to DataFrame
+predictions_df.loc[:, 'filename'] = pd.Series(validation_generator.filenames)
 
 # Join the predictions with the original data
 results = pd.merge(metadata, predictions_df, on='filename')
