@@ -1,0 +1,20 @@
+name: Build pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Deploy docs
+        uses: mhausenblas/mkdocs-deploy-gh-pages@1.24
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

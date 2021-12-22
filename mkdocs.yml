@@ -1,0 +1,32 @@
+site_name: MIDA Video analysis guide
+# site_url: 'https://lab.library.universiteitleiden.nl/'
+remote_branch: rendered
+theme:
+  name: material
+  font: false
+  # favicon: 'favicon.ico'
+  language: en
+  # custom_dir: leiden_theme
+
+# extra_css:
+  # - 'css/extra.css'
+
+plugins:
+  - search
+  # - htmlproofer
+  # - git-revision-date
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+      baselevel: 2
+  - footnotes
+
+nav:
+  - 'index.md'
+  - 'train-a-model.md'
+  - 'evaluate-model.md'
+  - 'make-predictions.md'
+  - 'improve-annotations.md'
