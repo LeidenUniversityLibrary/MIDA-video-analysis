@@ -3,7 +3,7 @@ Create a summary from YOLOv5 txt predictions
 
 Usage::
 
-    python yolo_summary.py <label_directory> <label0,label1,...> <output.csv>
+    python yolo_summary.py <label_directory> <label0,label1,...> <output.csv> <min_confidence>
 
 """
 import glob
@@ -15,6 +15,7 @@ import pandas as pd
 label_directory = sys.argv[1]
 labels = sys.argv[2].split(',')
 output_file = sys.argv[3]
+min_confidence = float(sys.argv[4])
 
 header = {}
 for i, l in enumerate(labels):
@@ -46,6 +47,7 @@ raw_df = pd.read_csv(raw_list,
                             'confidence': float})
 # Remove the directory name from the filenames
 raw_df.loc[:, 'filename'] = raw_df['filename'].str.replace(label_directory + '/', '')
+raw_df.loc[raw_df['confidence'] < min_confidence, 'confidence'] = 0
 # Group rows
 print(raw_df.head())
 piv = pd.pivot_table(raw_df, values='confidence', index='filename', columns='class', aggfunc=max, fill_value=0)
