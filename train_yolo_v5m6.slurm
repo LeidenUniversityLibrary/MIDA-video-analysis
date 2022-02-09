@@ -5,7 +5,7 @@
 #SBATCH --mail-user="b.a.companjen@library.leidenuniv.nl"
 #SBATCH --mail-type="ALL"
 #SBATCH --mem=25G
-#SBATCH --time=01:30:00
+#SBATCH --time=03:30:00
 #SBATCH --partition=gpu-short
 #SBATCH --ntasks=1
 #SBATCH --gpus=1
@@ -51,7 +51,7 @@ cd $RUNDIR
 
 # Run the file
 echo "[$SHELL] Run script"
-python train.py --data $DATAYAML --project $PROJECTDIR --name training --weights yolov5m6.pt --img 1280 --device $CUDA_VISIBLE_DEVICES --epochs 100
+python train.py --data $DATAYAML --project $PROJECTDIR --name training --weights yolov5m6.pt --batch 4 --img 1280 --device $CUDA_VISIBLE_DEVICES --epochs 100
 echo "[$SHELL] Script finished"
 
 # Move stat directory back to CWD
