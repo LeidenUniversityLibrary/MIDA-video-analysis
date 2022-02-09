@@ -1,0 +1,19 @@
+# YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+# Mustafa's collection of symbols dataset
+# Example usage: python train.py --data symbols2.yaml
+
+
+
+# Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
+path: ../datasets/mustafa  # dataset root dir
+train: train.txt  # train images (relative to 'path') 1000 images
+val: val.txt  # val images (relative to 'path') 238 images
+test:  # test images (optional)
+
+# Classes
+nc: 4  # number of classes
+names: ['pentagram', 'star_of_david', 'keys_of_heaven', 'flag']  # class names
+
+
+# Download script/URL (optional)
+#download: https://ultralytics.com/assets/coco128.zip
