@@ -4,7 +4,7 @@
 #SBATCH --error=%x_%j.err
 #SBATCH --mail-user="b.a.companjen@library.leidenuniv.nl"
 #SBATCH --mail-type="ALL"
-#SBATCH --mem=5G
+#SBATCH --mem=15G
 #SBATCH --time=01:30:00
 #SBATCH --partition=gpu-short
 #SBATCH --ntasks=1
@@ -36,8 +36,8 @@ echo "[$SHELL] Run directory: "$RUNDIR
 # Directory for detection results is created by the script
 export PROJECTDIR=$SCRATCH/detection
 
-export MODEL=$SCRATCH/best.pt
-cp $CWD/best.pt $MODEL
+export MODEL=$SCRATCH/yolo_1280.pt
+cp $HOME/models/yolo_1280.pt $MODEL
 # Directory for datasets
 export DATASETS=$SCRATCH/datasets
 mkdir -p $DATASETS
@@ -52,14 +52,18 @@ cd $RUNDIR
 
 # Run the file
 echo "[$SHELL] Run script"
-python detect.py --source $DATASETS/'**/*.jpg' --project $PROJECTDIR --weights $MODEL --device $CUDA_VISIBLE_DEVICES --save-txt --save-conf --nosave
+python detect.py --source $DATASETS/'star_of_david/*.jpg' --project $PROJECTDIR --name star --img 1280 --weights $MODEL --device $CUDA_VISIBLE_DEVICES --save-txt --save-conf
+python detect.py --source $DATASETS/'no_star_of_david/*.jpg' --project $PROJECTDIR --name no_star --img 1280 --weights $MODEL --device $CUDA_VISIBLE_DEVICES --save-txt --save-conf
+python detect.py --source $DATASETS/'frames_by_class/pentagram/**/*.jpg' --project $PROJECTDIR --name pentagram --img 1280 --weights $MODEL --device $CUDA_VISIBLE_DEVICES --save-txt --save-conf
+python detect.py --source $DATASETS/'frames_by_class/no_pentagram/**/*.jpg' --project $PROJECTDIR --name no_pentagram --img 1280 --weights $MODEL --device $CUDA_VISIBLE_DEVICES --save-txt --save-conf
 echo "[$SHELL] Script finished"
 
 # Move stat directory back to CWD
 echo "[$SHELL] Remove dataset of images"
 rm -rf $DATASETS
 echo "[$SHELL] Zip and copy files back to cwd"
-zip -r $SCRATCH/results_$SLURM_JOB_ID.zip $PROJECTDIR 
+cd $PROJECTDIR
+zip -r $SCRATCH/results_$SLURM_JOB_ID.zip ./ 
 cp -r $SCRATCH/results_$SLURM_JOB_ID.zip $CWD/
 
 echo "[$SHELL] #### Finished detection."

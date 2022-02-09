@@ -4,7 +4,7 @@
 #SBATCH --error=%x_%j.err
 #SBATCH --mail-user="b.a.companjen@library.leidenuniv.nl"
 #SBATCH --mail-type="ALL"
-#SBATCH --mem=5G
+#SBATCH --mem=15G
 #SBATCH --time=01:30:00
 #SBATCH --partition=gpu-short
 #SBATCH --ntasks=1
@@ -36,30 +36,34 @@ echo "[$SHELL] Run directory: "$RUNDIR
 # Directory for detection results is created by the script
 export PROJECTDIR=$SCRATCH/detection
 
-export MODEL=$SCRATCH/best.pt
-cp $CWD/best.pt $MODEL
+export MODEL=$SCRATCH/yolo_1280.pt
+cp $HOME/models/yolo_1280.pt $MODEL
 # Directory for datasets
 export DATASETS=$SCRATCH/datasets
 mkdir -p $DATASETS
 # Source to run detection on
-cp -r $HOME/frames_by_class.tar $HOME/star.zip $DATASETS/
+cp -r $HOME/ep2_0f.tar $DATASETS/
 cd $DATASETS
-tar -xf frames_by_class.tar
-unzip star.zip
+tar -xf ep2_0f.tar
 
 # Change to $RUNDIR
 cd $RUNDIR
 
 # Run the file
 echo "[$SHELL] Run script"
-python detect.py --source $DATASETS/'**/*.jpg' --project $PROJECTDIR --weights $MODEL --device $CUDA_VISIBLE_DEVICES --save-txt --save-conf --nosave
+for F in $(find $DATASETS -mindepth 1 -maxdepth 1 -type d)
+do
+echo "Starting on ${F#${DATASETS}/}"
+python detect.py --source $F/'**/*.jpg' --project $PROJECTDIR --name "ep2_${F#${DATASETS}/}" --img 1280 --weights $MODEL --device $CUDA_VISIBLE_DEVICES --save-txt --save-conf
+done
 echo "[$SHELL] Script finished"
 
 # Move stat directory back to CWD
 echo "[$SHELL] Remove dataset of images"
 rm -rf $DATASETS
 echo "[$SHELL] Zip and copy files back to cwd"
-zip -r $SCRATCH/results_$SLURM_JOB_ID.zip $PROJECTDIR 
+cd $PROJECTDIR
+zip -r $SCRATCH/results_$SLURM_JOB_ID.zip ./ 
 cp -r $SCRATCH/results_$SLURM_JOB_ID.zip $CWD/
 
 echo "[$SHELL] #### Finished detection."
