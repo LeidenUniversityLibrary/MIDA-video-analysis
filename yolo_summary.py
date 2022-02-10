@@ -5,6 +5,7 @@ Usage::
 
     python yolo_summary.py <label_directory> <label0,label1,...> <output.csv> <min_confidence>
 
+Labels, e.g.: 'pentagram,star_of_david,keys_of_heaven,flag'
 """
 import glob
 import sys
@@ -23,7 +24,7 @@ for i, l in enumerate(labels):
 
 raw_list = f"{label_directory}.txt"
 # Find all .txt files in the label directory
-label_files = glob.glob(label_directory+'/*.txt')
+label_files = glob.glob(label_directory+'/**/*.txt', recursive=True)
 with open(raw_list, 'w') as temp_file:
     # For each file, print the lines prepended by the filename or frame number
     for lfile in label_files:
