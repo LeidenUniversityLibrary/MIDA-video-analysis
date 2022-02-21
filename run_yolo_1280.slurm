@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=run_yolov5
+#SBATCH --job-name=m3_test
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --mail-user="b.a.companjen@library.leidenuniv.nl"
@@ -37,7 +37,7 @@ echo "[$SHELL] Run directory: "$RUNDIR
 export PROJECTDIR=$SCRATCH/detection
 
 export MODEL=$SCRATCH/yolo_1280.pt
-cp $HOME/models/yolo_1280.pt $MODEL
+cp $HOME/models/yolo_model_3/weights/best.pt $MODEL
 # Directory for datasets
 export DATASETS=$SCRATCH/datasets
 mkdir -p $DATASETS
