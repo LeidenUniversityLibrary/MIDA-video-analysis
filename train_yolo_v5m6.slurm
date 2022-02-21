@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=train_yolov5_m6
+#SBATCH --job-name=t_m3_yolov5
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --mail-user="b.a.companjen@library.leidenuniv.nl"
 #SBATCH --mail-type="ALL"
 #SBATCH --mem=25G
-#SBATCH --time=03:30:00
-#SBATCH --partition=gpu-short
+#SBATCH --time=06:30:00
+#SBATCH --partition=gpu-medium
 #SBATCH --ntasks=1
 #SBATCH --gpus=1
 
@@ -39,24 +39,26 @@ echo "[$SHELL] Run directory: "$RUNDIR
 export DATAYAML=$CWD/symbols2.yaml
 
 # Directory for training results is created by the script
-export PROJECTDIR=$SCRATCH/runs
+export PROJECTDIR=$SCRATCH/training
+export PROJECTNAME=yolo_model_3
 
 # Directory for training data must match $DATAYAML!
 export DATASETS=$SCRATCH/datasets
 mkdir -p $DATASETS
-cp -r $HOME/mustafa $DATASETS/
+cp -r $HOME/training_data $DATASETS/
 
 # Change to $RUNDIR
 cd $RUNDIR
 
 # Run the file
 echo "[$SHELL] Run script"
-python train.py --data $DATAYAML --project $PROJECTDIR --name training --weights yolov5m6.pt --batch 4 --img 1280 --device $CUDA_VISIBLE_DEVICES --epochs 100
+python train.py --data $DATAYAML --project $PROJECTDIR --name $PROJECTNAME --weights yolov5m6.pt --batch 4 --img 1280 --device $CUDA_VISIBLE_DEVICES --epochs 100
 echo "[$SHELL] Script finished"
 
 # Move stat directory back to CWD
 echo "[$SHELL] Copy files back to cwd"
-zip -r $SCRATCH/results_$SLURM_JOB_ID.zip $PROJECTDIR 
-cp -r $SCRATCH/results_$SLURM_JOB_ID.zip $CWD/
+cd $PROJECTDIR
+zip -r $SCRATCH/$PROJECTNAME-$SLURM_JOB_ID.zip ./ 
+cp -r $SCRATCH/$PROJECTNAME-$SLURM_JOB_ID.zip $CWD/
 
 echo "[$SHELL] #### Finished GPU training."
