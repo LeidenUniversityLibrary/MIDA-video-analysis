@@ -15,7 +15,7 @@ import pandas as pd
 def frame_to_time(ser: pd.Series) -> str:
     # The index is the frame number
     secs_raw = ser.name / 25
-    mins = int((secs_raw / 60))
+    mins = int((secs_raw / 60) % 60)
     hrs = int((secs_raw / 3600))
     secs = round(secs_raw % 60, 3)
     return f'{hrs}:{mins}:{secs}'
@@ -64,7 +64,7 @@ def main(label_file: str, output_csv, labels, min_confidence):
     raw_df.loc[:, 'filename'] = raw_df['filename'].str.replace('labels/' + base_name + '_0f_', '', regex=False)
     raw_df.loc[:, 'filename'] = raw_df['filename'].str.replace('.txt', '', regex=False)
     raw_df.loc[:, 'filename'] = pd.to_numeric(raw_df['filename']) * 10
-    raw_df.loc[raw_df['confidence'] < min_confidence, 'confidence'] = 0
+    raw_df = raw_df[raw_df['confidence'] >= min_confidence]
     raw_df.rename(columns={'filename':'frame'}, inplace=True)
     # Group rows
     print(raw_df.head())
