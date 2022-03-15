@@ -5,7 +5,7 @@
 #SBATCH --mail-user="b.a.companjen@library.leidenuniv.nl"
 #SBATCH --mail-type="ALL"
 #SBATCH --mem=4G
-#SBATCH --time=01:00:00
+#SBATCH --time=02:00:00
 #SBATCH --partition=gpu-short
 #SBATCH --ntasks=1
 #SBATCH --gpus=1
