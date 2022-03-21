@@ -1,9 +1,9 @@
 """
-Create a summary from YOLOv5 txt predictions
+Create a table of predictions from YOLOv5 txt files in a zip file
 
 Usage::
 
-    python yolo_summary.py <label_directory> <label0,label1,...> <output.csv> <min_confidence>
+    python yolo_zip_summary.py [options] <zip_file>
 
 Labels, e.g.: 'pentagram,star_of_david,keys_of_heaven,flag'
 """
@@ -26,7 +26,7 @@ def frame_to_time(ser: pd.Series) -> str:
 @click.option('-c', '--min-confidence', type=float, default=0.0)
 @click.argument('label_file', type=click.Path(exists=True))
 def main(label_file: str, output_csv, labels, min_confidence):
-
+    """Create a table of predictions from YOLOv5 txt files in a zip file"""
     labels_list = labels.split(',')
     if output_csv is None:
         output_csv = label_file.replace('.zip', '.csv')
