@@ -42,9 +42,10 @@ def main(label_file: str, output_csv, labels, min_confidence):
     with open(raw_list, 'w') as temp_file, zipfile.ZipFile(label_file, mode='r') as lz:
         # For each file, print the lines prepended by the filename or frame number
         for lfile in lz.namelist():
-            with TextIOWrapper(lz.open(lfile, 'r')) as lf:
-                for line in lf.readlines():
-                    temp_file.write(lfile + " " + line)
+            if lfile[-4:] == ".txt":
+                with TextIOWrapper(lz.open(lfile, 'r')) as lf:
+                    for line in lf.readlines():
+                        temp_file.write(lfile + " " + line)
 
     # Summarise the recognitions by frame and class, taking the highest confidence
     # for each
@@ -60,10 +61,9 @@ def main(label_file: str, output_csv, labels, min_confidence):
                                 'width': float,
                                 'height': float,
                                 'confidence': float})
-    # Remove the directory name from the filenames
-    raw_df.loc[:, 'filename'] = raw_df['filename'].str.replace('labels/' + base_name + '_0f_', '', regex=False)
-    raw_df.loc[:, 'filename'] = raw_df['filename'].str.replace('.txt', '', regex=False)
-    raw_df.loc[:, 'filename'] = pd.to_numeric(raw_df['filename']) * 10
+    # Extract the frame number from the file name
+    raw_df.loc[:, 'filename'] = raw_df['filename'].str.replace(r'^.+f-(\d+)\.txt', lambda m: m.group(1), regex=True)
+    raw_df.loc[:, 'filename'] = pd.to_numeric(raw_df['filename']) #* 10
     raw_df = raw_df[raw_df['confidence'] >= min_confidence]
     raw_df.rename(columns={'filename':'frame'}, inplace=True)
     # Group rows
