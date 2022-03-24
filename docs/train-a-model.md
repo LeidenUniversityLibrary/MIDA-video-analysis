@@ -6,4 +6,37 @@ title: Training a model
 
 # Create training data
 
+To train a model, we need images with labels, and a name for the model.
+We expect images to be in subdirectories of a given directory.
+The filenames and corresponding labels should be in a CSV file.
+Filenames must be in a column `filename` and must be relative to the given
+directory.
+Names of columns with (numeric 0 or 1) labels must end in `_visible`.
+
+Minimal example of a labels file:
+
+
+| filename      | pentagram_visible | star_visible |
+|---------------|-------------------|--------------|
+| image001.jpg  | 1                 | 0            |
+| image002.jpg  | 1                 | 1            |
+| image003.jpg  | 0                 | 1            |
+| image004.jpg  | 0                 | 0            |
+
+A model trained on these images and labels will have two outputs: `pentagram`
+and `star`.
+
 # Run the training
+
+To train a model, run:
+
+```console
+$ python build_multi_hot_model.py image_dir labels.csv output_model_dir
+```
+
+In this command:
+
+- `image_dir` is the directory that contains subdirectories with the images;
+- `labels.csv` is the CSV file holding the filename and label(s) for each image;
+- `output_model_dir` is the name of the model and the directory that it will
+  be saved to.
