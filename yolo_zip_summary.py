@@ -18,7 +18,7 @@ def frame_to_time(ser: pd.Series) -> str:
     mins = int((secs_raw / 60) % 60)
     hrs = int((secs_raw / 3600))
     secs = round(secs_raw % 60, 3)
-    return f'{hrs}:{mins}:{secs}'
+    return f'{hrs:02}:{mins:02}:{secs:05.2f}'
 
 @click.command()
 @click.option('-o', '--output-csv', type=click.Path(file_okay=True), help='Output file name', required=False)
