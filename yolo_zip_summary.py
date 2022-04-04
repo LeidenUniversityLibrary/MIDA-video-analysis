@@ -22,12 +22,21 @@ def frame_to_time(ser: pd.Series) -> str:
 
 @click.command()
 @click.option('-o', '--output-csv', type=click.Path(file_okay=True), help='Output file name', required=False)
-@click.option('-l', '--labels', required=True, default='pentagram,star_of_david,keys_of_heaven,flag')
-@click.option('-c', '--min-confidence', type=float, default=0.0)
+@click.option('-l', '--labels', required=True, default='pentagram,star_of_david,keys_of_heaven,flag', help='Comma-separated list of labels for the numeric classes')
+@click.option('-d', '--delete-labels', required=False, default='', help='Comma-separated list of labels to ignore')
+@click.option('-c', '--min-confidence', type=float, default=0.0, help='Minimum confidence level of predictions to keep')
 @click.argument('label_file', type=click.Path(exists=True))
-def main(label_file: str, output_csv, labels, min_confidence):
+def main(label_file: str, output_csv, labels, delete_labels, min_confidence):
     """Create a table of predictions from YOLOv5 txt files in a zip file"""
     labels_list = labels.split(',')
+    label_index = {}
+    for i, label in enumerate(labels_list):
+        label_index[label] = i
+    if delete_labels is not None and len(delete_labels) > 0:
+        ignored_labels = delete_labels.split(',')
+        ignored_classes = [label_index[x] for x in ignored_labels]
+    else:
+        ignored_classes = []
     if output_csv is None:
         output_csv = label_file.replace('.zip', '.csv')
 
@@ -64,6 +73,9 @@ def main(label_file: str, output_csv, labels, min_confidence):
     # Extract the frame number from the file name
     raw_df.loc[:, 'filename'] = raw_df['filename'].str.replace(r'^.+f-(\d+)\.txt', lambda m: m.group(1), regex=True)
     raw_df.loc[:, 'filename'] = pd.to_numeric(raw_df['filename']) #* 10
+    # Ignore specified classes
+    raw_df = raw_df[~raw_df['class'].isin(ignored_classes)]
+    # Ignore recognitions below threshold
     raw_df = raw_df[raw_df['confidence'] >= min_confidence]
     raw_df.rename(columns={'filename':'frame'}, inplace=True)
     # Group rows
