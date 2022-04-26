@@ -70,12 +70,14 @@ x = inputs  # Do not apply random data augmentation
 # Pre-trained Xception weights requires that input be normalized
 # from (0, 255) to a range (-1., +1.), the normalization layer
 # does the following, outputs = (inputs - mean) / sqrt(var)
-norm_layer = keras.layers.experimental.preprocessing.Normalization()
-mean = np.array([127.5] * 3)
-var = mean ** 2
-# Scale inputs to [-1, +1]
-x = norm_layer(x)
-norm_layer.set_weights([mean, var])
+# norm_layer = keras.layers.experimental.preprocessing.Normalization()
+# mean = np.array([127.5] * 3)
+# var = mean ** 2
+# # Scale inputs to [-1, +1]
+# x = norm_layer(x)
+# norm_layer.set_weights([mean, var])
+scale_layer = keras.layers.Rescaling(scale=1 / 127.5, offset=-1)
+x = scale_layer(inputs)
 
 # The base model contains batchnorm layers. We want to keep them in inference mode
 # when we unfreeze the base model for fine-tuning, so we make sure that the
@@ -102,7 +104,7 @@ model.compile(
 )
 
 print("Starting fit")
-epochs = 5
+epochs = 150
 model.fit(train_ds, epochs=epochs, validation_data=validation_ds)
 
 
