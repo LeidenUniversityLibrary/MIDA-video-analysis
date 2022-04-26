@@ -16,7 +16,7 @@ results_path = sys.argv[3]
 
 loaded_model = keras.models.load_model(model_directory)
 
-filenames = Dataset.list_files(str(images_path/'*/*/*'), shuffle=False)#.take(100)
+filenames = Dataset.list_files(str(images_path/'*/*'), shuffle=False)#.take(100)
 
 for f in filenames.take(5):
     print(f.numpy())
@@ -74,9 +74,9 @@ predictions = loaded_model.predict(images_ds, verbose=1)
 # pred_labels = tf.concat([predictions, all_labels], axis=1)
 predictions_ds = Dataset.from_tensor_slices(predictions)
 predictions_ds = predictions_ds.flat_map(lambda x: Dataset.from_tensor_slices(x))
-pred_labels = Dataset.zip((predictions_ds, filenames))
-results = pd.DataFrame(pred_labels.as_numpy_iterator(), columns=["prediction", "filename"])
-results.loc[:, "filename"] = results.loc[:, "filename"].astype("string").str.replace(str(images_path), "")
+pred_labels = Dataset.zip((filenames, predictions_ds))
+results = pd.DataFrame(pred_labels.as_numpy_iterator(), columns=["filename", "prediction"])
+results.loc[:, "filename"] = results.loc[:, "filename"].str.decode('utf-8').str.replace(str(images_path), "")
 results.to_csv(results_path, index=False)
 print(pred_labels)
 # print(loaded_model.evaluate(data_subset, verbose=1))
