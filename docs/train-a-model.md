@@ -4,7 +4,28 @@ title: Training a model
 
 # Overview
 
-# Create training data
+We have worked on various Keras-based models to predict the visibility of
+symbols in frames from the TV series.
+If there is only one symbol of interest, we could put the images with the
+symbol in one directory and the images without the symbol in another.
+The script `build_binary_classifier.py` works that way.
+
+When we want a model to predict the appearance of multiple different symbols,
+potentially in the same frame, using directories to separate the classes
+becomes intractible.
+In that case we have to create a CSV file that contains the filenames of the
+images and for each symbol a column that indicates the visibility of the symbol
+for each image.
+
+# Train a binary classifier from image directories
+
+## Image directory setup
+
+## Training the binary classifier
+
+# Train a multi-label model from images and metadata
+
+## Create training data
 
 To train a model, we need images with labels, and a name for the model.
 We expect images to be in subdirectories of a given directory.
@@ -26,7 +47,7 @@ Minimal example of a labels file:
 A model trained on these images and labels will have two outputs: `pentagram`
 and `star`.
 
-# Run the training
+## Run the training
 
 To train a model, run:
 

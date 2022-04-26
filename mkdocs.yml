@@ -25,8 +25,13 @@ markdown_extensions:
   - footnotes
 
 nav:
-  - 'index.md'
-  - 'train-a-model.md'
-  - 'evaluate-model.md'
-  - 'make-predictions.md'
-  - 'improve-annotations.md'
+  - Overview: 'index.md'
+  - Using Keras and Tensorflow:
+    - 'train-a-model.md'
+    - 'evaluate-model.md'
+    - 'make-predictions.md'
+    - 'improve-annotations.md'
+  - Using YOLOv5:
+    - 'train-a-yolo-model.md'
+    - 'detect-with-yolo-model.md'
+    - 'run-on-alice.md'
