@@ -43,6 +43,7 @@ def main(label_file: str, output_csv, labels, delete_labels, min_confidence):
     header = {}
     for i, l in enumerate(labels_list):
         header[i] = l + "_pred"
+    header['len'] = 'number_of'
 
     base_name = label_file[:label_file.rindex('_')]
     print(base_name)
@@ -80,8 +81,9 @@ def main(label_file: str, output_csv, labels, delete_labels, min_confidence):
     raw_df.rename(columns={'filename':'frame'}, inplace=True)
     # Group rows
     print(raw_df.head())
-    piv = pd.pivot_table(raw_df, values='confidence', index='frame', columns='class', aggfunc=max, fill_value=0)
+    piv = pd.pivot_table(raw_df, values='confidence', index='frame', columns='class', aggfunc=[max, len], fill_value=0)
     piv.rename(columns=header, inplace=True)
+    piv.columns = ['_'.join(col).strip('_') for col in piv.columns.values]
     piv.loc[:, 'timestamp'] = piv.apply(frame_to_time, axis=1)
     print(piv.head())
     piv.to_csv(output_csv)
