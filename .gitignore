@@ -1,3 +1,4 @@
 trained_model/
 .vscode/
 .DS_Store
+__pycache__/
