@@ -8,14 +8,21 @@ import click
 
 @click.command()
 @click.option('-i', '--image-dir', type=click.Path(exists=True, dir_okay=True), 
-    help='Directory with images for training and evaluation')
-@click.option('--model-name', help='Name of the model (must not include spaces)')
-@click.option('--model-basedir', type=click.Path(path_type=pathlib.Path), help='Base directory to store all models')
+    help='Directory with images for training and evaluation', required=True)
+@click.option('--model-name', help='Name of the model (must not include spaces)',
+    required=True)
+@click.option('--model-basedir', type=click.Path(path_type=pathlib.Path),
+    help='Base directory to store all models', required=True)
 @click.option('--epochs', type=int, default=50, show_default=True)
 @click.option('--seed', type=int, default=42, show_default=True)
 @click.option('--split', default=0.2, show_default=True)
 def train(image_dir, model_name, model_basedir, epochs, seed, split):
-
+    """
+    Train a binary classifier for images.
+    
+    The location of the trained model is based on the --model-basedir and
+    --model-name options.
+    """
     model_directory = model_basedir / model_name
 
     # The `tf.keras.preprocessing.image_dataset_from_directory` can be used to
