@@ -4,38 +4,12 @@ import numpy as np
 from tensorflow import keras
 from tensorflow.data import Dataset
 import os
-import sys
+import click
 import pandas as pd
 import pathlib
 
-
-# Load parameters
-model_directory = sys.argv[1]
-images_path = pathlib.Path(sys.argv[2])
-results_path = sys.argv[3]
-
-loaded_model = keras.models.load_model(model_directory)
-
-filenames = Dataset.list_files(str(images_path/'*/*'), shuffle=False)#.take(100)
-
-for f in filenames.take(5):
-    print(f.numpy())
-
-
-class_names = np.array(sorted([item.name for item in images_path.glob('*')]))
-print(class_names)
-
 img_height = 150
 img_width = 150
-
-
-def get_label(file_path):
-    # convert the path to a list of path components
-    parts = tf.strings.split(file_path, os.path.sep)
-    # The third to last is the class-directory
-    one_hot = parts[-3] == class_names
-    # Integer encode the label
-    return tf.argmax(one_hot)
 
 
 def decode_img(img):
@@ -46,37 +20,40 @@ def decode_img(img):
 
 
 def process_path(file_path):
-    label = get_label(file_path)
     # load the raw data from the file as a string
     img = tf.io.read_file(file_path)
     img = tf.expand_dims( decode_img(img) , axis=0)
-    return img, label
+    return img
+
+@click.command()
+@click.option('-m', '--model-directory', type=click.Path(exists=True, dir_okay=True), required=True)
+@click.option('-i', '--images-directory', type=click.Path(exists=True, dir_okay=True, path_type=pathlib.Path), required=True)
+@click.option('-p', '--pattern', default='*/*/*/*.jpg', show_default=True)
+@click.option('-o', '--output', type=click.Path(writable=True), required=True)
+def predict(model_directory, images_directory, pattern, output):
+    """
+    Predict whether some class label applies to images in a directory.
+    """
+    # Load the filenames and the actual images
+    filenames = Dataset.list_files(str(images_directory/pattern), shuffle=False)
+
+    for f in filenames.take(5):
+        print(f.numpy())
+
+    images_ds = filenames.map(process_path, num_parallel_calls=tf.data.AUTOTUNE, deterministic=True)
+    
+    # Load model
+    loaded_model = keras.models.load_model(model_directory)
+    # Make predictions
+    predictions = loaded_model.predict(images_ds, verbose=1)
+    # Convert predictions to DataFrame with filenames
+    predictions_ds = Dataset.from_tensor_slices(predictions)
+    predictions_ds = predictions_ds.flat_map(lambda x: Dataset.from_tensor_slices(x))
+    pred_labels = Dataset.zip((filenames, predictions_ds))
+    results = pd.DataFrame(pred_labels.as_numpy_iterator(), columns=["filename", "prediction"])
+    results.loc[:, "filename"] = results.loc[:, "filename"].str.decode('utf-8').str.removeprefix(str(images_directory) + "/")
+    results.to_csv(output, index=False)
 
 
-images_ds = filenames.map(process_path, num_parallel_calls=tf.data.AUTOTUNE, deterministic=True)
-for f in images_ds.take(5):
-    print(f[1].numpy())
-
-
-# label_batches = list(labels for images,labels in data_subset)
-# all_labels = tf.concat(label_batches, 0)
-# for images, labels in data_subset:
-    # all_labels = np.concatenate([all_labels,labels.numpy()])
-    # print(labels.numpy())
-# print(all_labels.shape)
-
-predictions = loaded_model.predict(images_ds, verbose=1)
-# print(predictions, len(predictions))
-# sig_predictions = tf.keras.activations.sigmoid(predictions)
-# print(sig_predictions.shape)
-# pred_labels = tf.stack([sig_predictions, all_labels], axis=1)
-# pred_labels = tf.concat([sig_predictions, all_labels], axis=1)
-# pred_labels = tf.concat([predictions, all_labels], axis=1)
-predictions_ds = Dataset.from_tensor_slices(predictions)
-predictions_ds = predictions_ds.flat_map(lambda x: Dataset.from_tensor_slices(x))
-pred_labels = Dataset.zip((filenames, predictions_ds))
-results = pd.DataFrame(pred_labels.as_numpy_iterator(), columns=["filename", "prediction"])
-results.loc[:, "filename"] = results.loc[:, "filename"].str.decode('utf-8').str.replace(str(images_path), "")
-results.to_csv(results_path, index=False)
-print(pred_labels)
-# print(loaded_model.evaluate(data_subset, verbose=1))
+if __name__ == '__main__':
+    predict()
