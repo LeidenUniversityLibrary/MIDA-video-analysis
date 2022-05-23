@@ -11,6 +11,8 @@ from io import TextIOWrapper
 import zipfile
 import click
 import pandas as pd
+from map_crops import get_image_file
+from collections import defaultdict
 
 def frame_to_time(ser: pd.Series) -> str:
     # The index is the frame number
@@ -45,16 +47,22 @@ def main(label_file: str, output_csv, labels, delete_labels, min_confidence):
         header[i] = l + "_pred"
     header['len'] = 'number_of'
 
-    base_name = label_file[:label_file.rindex('_')]
-    print(base_name)
     raw_list = label_file.replace('.zip', '.txt')
+    crop_list = label_file.replace('.zip', '_crops.txt')
     # Read all .txt files in the archive
-    with open(raw_list, 'w') as temp_file, zipfile.ZipFile(label_file, mode='r') as lz:
+    with open(raw_list, 'w') as temp_file, open(crop_list, 'w') as crops_file, zipfile.ZipFile(label_file, mode='r') as lz:
         # For each file, print the lines prepended by the filename or frame number
         for lfile in lz.namelist():
             if lfile[-4:] == ".txt":
                 with TextIOWrapper(lz.open(lfile, 'r')) as lf:
+                    # Count occurrences per class
+                    occurrences = defaultdict(int)
                     for line in lf.readlines():
+                        # Find the cropped image
+                        line_label = labels_list[int(line[0])]
+                        occurrences[line_label] += 1
+                        image_filename = get_image_file(lfile, line_label, occurrences[line_label])
+                        crops_file.write(f'{lfile} {occurrences[line_label]} {image_filename}\n')
                         temp_file.write(lfile + " " + line)
 
     # Summarise the recognitions by frame and class, taking the highest confidence
