@@ -42,14 +42,35 @@ See [Train a model](train-a-model.md) for instructions.
 ## Predict whether cropped images are the expected symbol
 
 Run the new classifier on each crop directory that YOLO made for the symbol.
+You could use `predict_binary_images.py` for this.
 
+```sh
+cd yolo_model_5-recognitions
+for I in {1..54}; do
+mkdir -p ${I}/crops
+unzip -u ${I}/ep${I}_211984_recognitions.zip '*.jpg' -d ${I}/crops
+python ~/git/MIDA-video-analysis/predict_binary_images.py --model-directory ~/surfdrive/Projecten/MIDA/Mustafa/models/star_verifier --images-directory ${I}/crops --pattern '*/*/star_of_david/*.jpg' --output ${I}/star_results.csv
+done
+```
 
 ## Remove incorrectly identified symbols
 
 We need to remove the lines from the predictions text files that correspond to
 images that our classifier thinks are not the symbol we are looking for.
 
-This is what the *FIXME script* does.
+The `yolo_zip_summary.py` script provides the `-a` (or `--aux-results`) option that expects a tuple
+of class label (as text) and corresponding results file.
+The threshold for including images based on the auxiliary classification is set
+to 0.3.
+This option can be repeated, so you could use auxiliary classification results
+for multiple symbols.
+
+```sh
+cd yolo_model_5-recognitions
+for I in {1..54}; do
+python ~/git/MIDA-video-analysis/yolo_zip_summary.py -a star_of_david ${I}/star_results.csv --min-confidence 0.4 --output-csv ${I}/ep${I}-0_4-counts.csv --delete-labels pentagram,keys_of_heaven ${I}/ep${I}_211984_recognitions.zip
+done
+```
 
 # Summarise results
 
@@ -57,13 +78,35 @@ This is what the *FIXME script* does.
 
 Run `yolo_zip_summary.py` for zipped results (such as the results from ALICE).
 
+```sh
+cd yolo_model_5-recognitions
+for I in {1..54}; do
+python ~/git/MIDA-video-analysis/yolo_zip_summary.py --min-confidence 0.4 --output-csv ${I}/ep${I}-0_4-counts.csv --delete-labels pentagram,keys_of_heaven ${I}/ep${I}_211984_recognitions.zip
+done
+```
+
 ## Combine with detected scenes
 
 Run `match_symbols_to_scenes.py`.
 
+```sh
+cd yolo_model_5-recognitions/..
+for I in {1..54}; do
+python ~/git/MIDA-video-analysis/match_symbols_to_scenes.py \
+ --symbols yolo_model_5-recognitions/${I}/ep${I}-0_4-counts.csv \
+ --scenes scene-detection-results/${I}/scenes.csv \
+ --output yolo_model_5-recognitions/${I}/ep${I}-0_4-with-scenes.csv
+done
+```
+
 ## Concatenate files per episode into one file
 
 We used [csvstack].
+
+```bash
+cd yolo_model_5-recognitions
+csvstack --filenames {1..54}/*0_4-with-scenes.csv > all_recognitions-0_4-with-scenes.csv
+```
 
 [csvstack]: https://csvkit.readthedocs.io/en/latest/scripts/csvstack.html
 
