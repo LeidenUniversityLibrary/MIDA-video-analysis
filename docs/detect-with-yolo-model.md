@@ -108,6 +108,15 @@ cd yolo_model_5-recognitions
 csvstack --filenames {1..54}/*0_4-with-scenes.csv > all_recognitions-0_4-with-scenes.csv
 ```
 
+If the CSV files are not similarly structured, you can concatenate them using
+the `join_results.py` script.
+
+```bash
+cd yolo_model_5-recognitions
+python ~/git/MIDA-video-analysis/join_results.py -o all_recognitions-0_4-with-scenes.csv {1..54}/*0_4-with-scenes.csv
+```
+
+
 [csvstack]: https://csvkit.readthedocs.io/en/latest/scripts/csvstack.html
 
 ## Count symbols per scene
