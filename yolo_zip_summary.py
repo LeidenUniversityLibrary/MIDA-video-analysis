@@ -22,14 +22,17 @@ def frame_to_time(ser: pd.Series) -> str:
     secs = round(secs_raw % 60, 3)
     return f'{hrs:02}:{mins:02}:{secs:05.2f}'
 
+
 @click.command()
 @click.option('-o', '--output-csv', type=click.Path(file_okay=True), help='Output file name', required=False)
+@click.option('-a', '--aux-results', type=(str, click.Path(file_okay=True)), multiple=True, help='Tuple of class and auxiliary classification of crops', required=False)
 @click.option('-l', '--labels', required=True, default='pentagram,star_of_david,keys_of_heaven,flag', help='Comma-separated list of labels for the numeric classes')
 @click.option('-d', '--delete-labels', required=False, default='', help='Comma-separated list of labels to ignore')
 @click.option('-c', '--min-confidence', type=float, default=0.0, help='Minimum confidence level of predictions to keep')
 @click.argument('label_file', type=click.Path(exists=True))
-def main(label_file: str, output_csv, labels, delete_labels, min_confidence):
+def main(label_file: str, output_csv, aux_results, labels, delete_labels, min_confidence):
     """Create a table of predictions from YOLOv5 txt files in a zip file"""
+    print(label_file)
     labels_list = labels.split(',')
     label_index = {}
     for i, label in enumerate(labels_list):
@@ -47,6 +50,17 @@ def main(label_file: str, output_csv, labels, delete_labels, min_confidence):
         header[i] = l + "_pred"
     header['len'] = 'number_of'
 
+    # Load classification results
+    # print(aux_results)
+    true_positives = {}
+    for class_name, class_file in aux_results:
+        aux_classifications = pd.read_csv(class_file)
+        print(f'We have extra classifications of {aux_classifications.shape[0]} {class_name} crops.')
+        aux_classifications = aux_classifications[aux_classifications['prediction'] >= 0.3]
+        true_positives[class_name] = aux_classifications['filename'].to_list()
+        print(f'{len(true_positives[class_name])} are treated as true positives.')
+
+
     raw_list = label_file.replace('.zip', '.txt')
     crop_list = label_file.replace('.zip', '_crops.txt')
     # Read all .txt files in the archive
@@ -63,6 +77,9 @@ def main(label_file: str, output_csv, labels, delete_labels, min_confidence):
                         occurrences[line_label] += 1
                         image_filename = get_image_file(lfile, line_label, occurrences[line_label])
                         crops_file.write(f'{lfile} {occurrences[line_label]} {image_filename}\n')
+                        if line_label in true_positives and image_filename not in true_positives[line_label]:
+                            # print(f'False positive: {image_filename}')
+                            continue
                         temp_file.write(lfile + " " + line)
 
     # Summarise the recognitions by frame and class, taking the highest confidence
