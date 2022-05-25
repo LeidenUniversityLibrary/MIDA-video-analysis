@@ -16,7 +16,8 @@ It is advisable to use a tool like <https://makesense.ai/>.
     If you create various datasets, make sure to use the same labels in each of
     them.
     YOLO expects numbers as labels and training will not give expected results
-    if in one dataset the symbol A maps to 2 in another dataset it maps to 0.
+    if in one dataset the symbol A maps to 2 and in another dataset it maps to
+    0.
 
 Various tips are available in the [YOLOv5 custom data guide][customdata].
 
