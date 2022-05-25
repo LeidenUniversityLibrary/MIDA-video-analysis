@@ -1,0 +1,779 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.4">
+    
+    
+      
+        <title>Detect symbols with YOLO model - MIDA Video analysis guide</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.db9e7362.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.3f5d1f46.min.css">
+        
+      
+    
+    
+    
+      
+    
+    
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL("..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#prepare-data-to-run-on" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="MIDA Video analysis guide" class="md-header__button md-logo" aria-label="MIDA Video analysis guide" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            MIDA Video analysis guide
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Detect symbols with YOLO model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="MIDA Video analysis guide" class="md-nav__button md-logo" aria-label="MIDA Video analysis guide" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    MIDA Video analysis guide
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Using Keras and Tensorflow
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Using Keras and Tensorflow" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Using Keras and Tensorflow
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../train-a-model/" class="md-nav__link">
+        Training a classification model
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../evaluate-model/" class="md-nav__link">
+        Evaluating a model
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../make-predictions/" class="md-nav__link">
+        Make predictions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../improve-annotations/" class="md-nav__link">
+        Using predictions to improve annotations
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Using YOLOv5
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Using YOLOv5" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Using YOLOv5
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../train-a-yolo-model/" class="md-nav__link">
+        Train a YOLOv5 model
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Detect symbols with YOLO model
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Detect symbols with YOLO model
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prepare-data-to-run-on" class="md-nav__link">
+    Prepare data to run on
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-yolo-model" class="md-nav__link">
+    Run YOLO model
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filter-false-positives-using-a-binary-classifier" class="md-nav__link">
+    Filter false positives using a binary classifier
+  </a>
+  
+    <nav class="md-nav" aria-label="Filter false positives using a binary classifier">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#collect-training-data" class="md-nav__link">
+    Collect training data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#train-binary-classifier" class="md-nav__link">
+    Train binary classifier
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#predict-whether-cropped-images-are-the-expected-symbol" class="md-nav__link">
+    Predict whether cropped images are the expected symbol
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-incorrectly-identified-symbols" class="md-nav__link">
+    Remove incorrectly identified symbols
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summarise-results" class="md-nav__link">
+    Summarise results
+  </a>
+  
+    <nav class="md-nav" aria-label="Summarise results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run-yolo-summarise" class="md-nav__link">
+    Run yolo summarise
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combine-with-detected-scenes" class="md-nav__link">
+    Combine with detected scenes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concatenate-files-per-episode-into-one-file" class="md-nav__link">
+    Concatenate files per episode into one file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count-symbols-per-scene" class="md-nav__link">
+    Count symbols per scene
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../run-on-alice/" class="md-nav__link">
+        Running YOLOv5 on the ALICE HPC
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prepare-data-to-run-on" class="md-nav__link">
+    Prepare data to run on
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-yolo-model" class="md-nav__link">
+    Run YOLO model
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filter-false-positives-using-a-binary-classifier" class="md-nav__link">
+    Filter false positives using a binary classifier
+  </a>
+  
+    <nav class="md-nav" aria-label="Filter false positives using a binary classifier">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#collect-training-data" class="md-nav__link">
+    Collect training data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#train-binary-classifier" class="md-nav__link">
+    Train binary classifier
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#predict-whether-cropped-images-are-the-expected-symbol" class="md-nav__link">
+    Predict whether cropped images are the expected symbol
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-incorrectly-identified-symbols" class="md-nav__link">
+    Remove incorrectly identified symbols
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summarise-results" class="md-nav__link">
+    Summarise results
+  </a>
+  
+    <nav class="md-nav" aria-label="Summarise results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run-yolo-summarise" class="md-nav__link">
+    Run yolo summarise
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combine-with-detected-scenes" class="md-nav__link">
+    Combine with detected scenes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concatenate-files-per-episode-into-one-file" class="md-nav__link">
+    Concatenate files per episode into one file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count-symbols-per-scene" class="md-nav__link">
+    Count symbols per scene
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                  <h1>Detect symbols with YOLO model</h1>
+                
+                <h2 id="prepare-data-to-run-on">Prepare data to run on<a class="headerlink" href="#prepare-data-to-run-on" title="Permanent link">&para;</a></h2>
+<h2 id="run-yolo-model">Run YOLO model<a class="headerlink" href="#run-yolo-model" title="Permanent link">&para;</a></h2>
+<p>Command goes here.</p>
+<p>While it is possible to run YOLOv5 locally, it is highly advisable to use a
+machine with a GPU.
+See our <a href="../run-on-alice/">instructions on running detection on the ALICE HPC</a>
+to understand how we used ALICE.</p>
+<h2 id="filter-false-positives-using-a-binary-classifier">Filter false positives using a binary classifier<a class="headerlink" href="#filter-false-positives-using-a-binary-classifier" title="Permanent link">&para;</a></h2>
+<p>Our YOLO model may predict a lot of false positives, even after increasing the
+number of training examples and epochs.
+We can try to remove false positives using a Keras-based binary classifier
+that works on the cropped images that YOLO thinks are symbols.</p>
+<h3 id="collect-training-data">Collect training data<a class="headerlink" href="#collect-training-data" title="Permanent link">&para;</a></h3>
+<p>In our case only one symbol had many false positives.
+That means we only need to collect a sample of true and false positives for
+that symbol and we can train a binary classifier on this sample.</p>
+<p>Copy a set of correctly identified crops into one directory and a set of
+incorrectly identified crops into another.
+It helps if the directory names are such that the false positives come first,
+so that they internally get mapped to <code>0</code>, while true positives get <code>1</code>.
+When we then predict the correctness, the rounded confidence matches false and
+true positive, respectively.</p>
+<h3 id="train-binary-classifier">Train binary classifier<a class="headerlink" href="#train-binary-classifier" title="Permanent link">&para;</a></h3>
+<p>See <a href="../train-a-model/">Train a model</a> for instructions.</p>
+<h3 id="predict-whether-cropped-images-are-the-expected-symbol">Predict whether cropped images are the expected symbol<a class="headerlink" href="#predict-whether-cropped-images-are-the-expected-symbol" title="Permanent link">&para;</a></h3>
+<p>Run the new classifier on each crop directory that YOLO made for the symbol.
+You could use <code>predict_binary_images.py</code> for this.</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd</span> yolo_model_5-recognitions
+<span class="k">for</span> I <span class="k">in</span> <span class="o">{</span><span class="m">1</span>..54<span class="o">}</span><span class="p">;</span> <span class="k">do</span>
+mkdir -p <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/crops
+unzip -u <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/ep<span class="si">${</span><span class="nv">I</span><span class="si">}</span>_211984_recognitions.zip <span class="s1">&#39;*.jpg&#39;</span> -d <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/crops
+python ~/git/MIDA-video-analysis/predict_binary_images.py --model-directory ~/surfdrive/Projecten/MIDA/Mustafa/models/star_verifier --images-directory <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/crops --pattern <span class="s1">&#39;*/*/star_of_david/*.jpg&#39;</span> --output <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/star_results.csv
+<span class="k">done</span>
+</code></pre></div>
+
+<h3 id="remove-incorrectly-identified-symbols">Remove incorrectly identified symbols<a class="headerlink" href="#remove-incorrectly-identified-symbols" title="Permanent link">&para;</a></h3>
+<p>We need to remove the lines from the predictions text files that correspond to
+images that our classifier thinks are not the symbol we are looking for.</p>
+<p>The <code>yolo_zip_summary.py</code> script provides the <code>-a</code> (or <code>--aux-results</code>) option that expects a tuple
+of class label (as text) and corresponding results file.
+The threshold for including images based on the auxiliary classification is set
+to 0.3.
+This option can be repeated, so you could use auxiliary classification results
+for multiple symbols.</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd</span> yolo_model_5-recognitions
+<span class="k">for</span> I <span class="k">in</span> <span class="o">{</span><span class="m">1</span>..54<span class="o">}</span><span class="p">;</span> <span class="k">do</span>
+python ~/git/MIDA-video-analysis/yolo_zip_summary.py -a star_of_david <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/star_results.csv --min-confidence <span class="m">0</span>.4 --output-csv <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/ep<span class="si">${</span><span class="nv">I</span><span class="si">}</span>-0_4-counts.csv --delete-labels pentagram,keys_of_heaven <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/ep<span class="si">${</span><span class="nv">I</span><span class="si">}</span>_211984_recognitions.zip
+<span class="k">done</span>
+</code></pre></div>
+
+<h2 id="summarise-results">Summarise results<a class="headerlink" href="#summarise-results" title="Permanent link">&para;</a></h2>
+<h3 id="run-yolo-summarise">Run yolo summarise<a class="headerlink" href="#run-yolo-summarise" title="Permanent link">&para;</a></h3>
+<p>Run <code>yolo_zip_summary.py</code> for zipped results (such as the results from ALICE).</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd</span> yolo_model_5-recognitions
+<span class="k">for</span> I <span class="k">in</span> <span class="o">{</span><span class="m">1</span>..54<span class="o">}</span><span class="p">;</span> <span class="k">do</span>
+python ~/git/MIDA-video-analysis/yolo_zip_summary.py --min-confidence <span class="m">0</span>.4 --output-csv <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/ep<span class="si">${</span><span class="nv">I</span><span class="si">}</span>-0_4-counts.csv --delete-labels pentagram,keys_of_heaven <span class="si">${</span><span class="nv">I</span><span class="si">}</span>/ep<span class="si">${</span><span class="nv">I</span><span class="si">}</span>_211984_recognitions.zip
+<span class="k">done</span>
+</code></pre></div>
+
+<h3 id="combine-with-detected-scenes">Combine with detected scenes<a class="headerlink" href="#combine-with-detected-scenes" title="Permanent link">&para;</a></h3>
+<p>Run <code>match_symbols_to_scenes.py</code>.</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd</span> yolo_model_5-recognitions/..
+<span class="k">for</span> I <span class="k">in</span> <span class="o">{</span><span class="m">1</span>..54<span class="o">}</span><span class="p">;</span> <span class="k">do</span>
+python ~/git/MIDA-video-analysis/match_symbols_to_scenes.py <span class="se">\</span>
+ --symbols yolo_model_5-recognitions/<span class="si">${</span><span class="nv">I</span><span class="si">}</span>/ep<span class="si">${</span><span class="nv">I</span><span class="si">}</span>-0_4-counts.csv <span class="se">\</span>
+ --scenes scene-detection-results/<span class="si">${</span><span class="nv">I</span><span class="si">}</span>/scenes.csv <span class="se">\</span>
+ --output yolo_model_5-recognitions/<span class="si">${</span><span class="nv">I</span><span class="si">}</span>/ep<span class="si">${</span><span class="nv">I</span><span class="si">}</span>-0_4-with-scenes.csv
+<span class="k">done</span>
+</code></pre></div>
+
+<h3 id="concatenate-files-per-episode-into-one-file">Concatenate files per episode into one file<a class="headerlink" href="#concatenate-files-per-episode-into-one-file" title="Permanent link">&para;</a></h3>
+<p>We used <a href="https://csvkit.readthedocs.io/en/latest/scripts/csvstack.html">csvstack</a>.</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd</span> yolo_model_5-recognitions
+csvstack --filenames <span class="o">{</span><span class="m">1</span>..54<span class="o">}</span>/*0_4-with-scenes.csv &gt; all_recognitions-0_4-with-scenes.csv
+</code></pre></div>
+
+<p>If the CSV files are not similarly structured, you can concatenate them using
+the <code>join_results.py</code> script.</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd</span> yolo_model_5-recognitions
+python ~/git/MIDA-video-analysis/join_results.py -o all_recognitions-0_4-with-scenes.csv <span class="o">{</span><span class="m">1</span>..54<span class="o">}</span>/*0_4-with-scenes.csv
+</code></pre></div>
+
+<h3 id="count-symbols-per-scene">Count symbols per scene<a class="headerlink" href="#count-symbols-per-scene" title="Permanent link">&para;</a></h3>
+<p>Not implemented yet, but you could load the combined results into a spreadsheet
+application and create a pivot table that shows the number of symbols by
+episode and scene.</p>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../train-a-yolo-model/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Train a YOLOv5 model" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Train a YOLOv5 model
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../run-on-alice/" class="md-footer__link md-footer__link--next" aria-label="Next: Running YOLOv5 on the ALICE HPC" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Running YOLOv5 on the ALICE HPC
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        
+          Made with
+          <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+            Material for MkDocs
+          </a>
+        
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.8397ff9e.min.js", "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.1e84347e.min.js"></script>
+      
+    
+  </body>
+</html>
