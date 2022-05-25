@@ -25,12 +25,14 @@ In this command:
 
 # Make predictions for files in a CSV
 
-## Create frame list
-
 The other script that runs the model is based on the script for evaluation.
 It reads the filenames of the frames, as well as the expected labels from a CSV
 file.
 We therefore need to create the CSV file first.
+
+## Create frame list
+
+This is done with `add_empty_labels_to_frames.py`.
 
 ## Make predictions from the frame list
 
