@@ -27,7 +27,7 @@ loaded_model = keras.models.load_model(model_directory)
 loaded_model.summary()
 
 
-filenames = Dataset.list_files(str(images_path/'*/*/*.jpg'), shuffle=False)#.take(100)
+filenames = Dataset.list_files(str(images_path/'*/*/*/*.jpg'), shuffle=False)#.take(100)
 
 
 img_height = 150
